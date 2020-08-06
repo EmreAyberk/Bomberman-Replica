@@ -1,0 +1,53 @@
+﻿using UnityEngine;
+using UnityEngine.Tilemaps;
+using UnityEngine.UI;
+
+public class MapDestroyer : MonoBehaviour
+{
+    public Tilemap tilemap;
+
+    public Tile wallTile;
+    public Tile destructableTile;
+    public GameObject explosionPrefab;
+    public void Explode(Vector2 worldPos)
+    {
+        Vector3Int originCell = tilemap.WorldToCell(worldPos);
+        ExplodeCell(originCell);
+        if (ExplodeCell(originCell + new Vector3Int(1, 0, 0)))
+        {
+            ExplodeCell(originCell + new Vector3Int(2,0,0));
+        }
+
+        if (ExplodeCell(originCell + new Vector3Int(0, 1, 0)))
+        {
+            ExplodeCell(originCell + new Vector3Int(0,2,0));
+        }
+
+        if (ExplodeCell(originCell + new Vector3Int(-1, 0, 0)))
+        {
+            ExplodeCell(originCell + new Vector3Int(-2,0,0));
+        }
+        if (ExplodeCell(originCell + new Vector3Int(0, -1, 0)))
+        {
+            ExplodeCell(originCell + new Vector3Int(0,-2,0));
+        }
+    }
+
+    bool ExplodeCell(Vector3Int cell)
+    {
+        Tile tile = tilemap.GetTile<Tile>(cell);
+        if (tile == wallTile)
+        {
+            return false;
+        }
+
+        if (tile == destructableTile)
+        {
+           tilemap.SetTile(cell,null);
+        }
+
+        Vector3 cellCenterPos = tilemap.GetCellCenterWorld(cell);
+        Instantiate(explosionPrefab, cellCenterPos, Quaternion.identity);
+        return true;
+    }
+}
